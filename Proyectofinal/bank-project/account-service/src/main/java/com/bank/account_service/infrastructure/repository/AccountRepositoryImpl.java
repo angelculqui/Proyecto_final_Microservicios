@@ -17,8 +17,8 @@ public class AccountRepositoryImpl implements AccountRepository {
     private final AccountMongoRepository mongoRepo;
 
     @Override
-    public Account save(Account account) {
-        return mongoRepo.save(account).block();
+    public Mono<Account> save(Account account) {
+        return mongoRepo.save(account);
     }
 
     @Override
@@ -32,12 +32,12 @@ public class AccountRepositoryImpl implements AccountRepository {
     }
 
     @Override
-    public Account update(Account account) {
-        return mongoRepo.save(account).block();
+    public Mono<Account> update(Account account) {
+        return mongoRepo.save(account);
     }
 
     @Override
-    public void deleteById(String id) {
-        mongoRepo.deleteById(id).block();
+    public Mono<Void> deleteById(String id) {
+        return mongoRepo.deleteById(id);
     }
 }

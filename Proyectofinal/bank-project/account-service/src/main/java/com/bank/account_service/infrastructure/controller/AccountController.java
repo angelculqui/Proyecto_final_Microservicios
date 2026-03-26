@@ -13,9 +13,8 @@ import reactor.core.publisher.Mono;
 public class AccountController {
 
     private final AccountService accountService;
-
     @PostMapping
-    public Account createAccount(@RequestBody Account account) {
+    public Mono<Account> createAccount(@RequestBody Account account) {
         return accountService.createAccount(account);
     }
 
@@ -30,12 +29,12 @@ public class AccountController {
     }
 
     @PutMapping
-    public Account updateAccount(@RequestBody Account account) {
+    public Mono<Account> updateAccount(@RequestBody Account account) {
         return accountService.updateAccount(account);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteAccount(@PathVariable String id) {
-        accountService.deleteAccount(id);
+    public Mono<Void> deleteAccount(@PathVariable String id) {
+        return accountService.deleteAccount(id);
     }
 }

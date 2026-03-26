@@ -1,0 +1,29 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: account-service
+  data:
+    mongodb:
+      uri: mongodb://mongo:27017/bank_db
+  redis:
+    host: redis
+
+logging:
+  level:
+    root: INFO
+    com.bank.account_service: DEBUG
+
+kafka:
+  bootstrap-servers: kafka:9092
+schema:
+  registry:
+    url: http://schema-registry:8081
+
+spring:
+  main:
+    allow-bean-definition-overriding: true
+
+
+

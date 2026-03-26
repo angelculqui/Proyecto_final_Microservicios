@@ -5,10 +5,9 @@ import com.bank.customer_service.domain.model.Customer;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/api/customers")
@@ -19,37 +18,35 @@ public class CustomerController {
 
     // Obtener todos
     @GetMapping
-    public ResponseEntity<List<Customer>> getAll() {
-        return ResponseEntity.ok(customerService.getAllCustomers());
+    public Flux<Customer> getAll() {
+        return customerService.getAllCustomers();
     }
 
     // Obtener por ID
     @GetMapping("/{id}")
-    public ResponseEntity<Customer> getById(@PathVariable String id) {
-        return customerService.getCustomerById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public Mono<Customer> getById(@PathVariable String id) {
+        return customerService.getCustomerById(id);
     }
 
     // Crear
     @PostMapping
-    public ResponseEntity<Customer> create(@Valid @RequestBody Customer customer) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(customerService.createCustomer(customer));
+    @ResponseStatus(HttpStatus.CREATED)
+    public Mono<Customer> create(@Valid @RequestBody Customer customer) {
+        return customerService.createCustomer(customer);
     }
 
     // Actualizar
     @PutMapping("/{id}")
-    public ResponseEntity<Customer> update(@PathVariable String id,
+    public Mono<Customer> update(@PathVariable String id,
                                            @Valid @RequestBody Customer customer) {
 
-        return ResponseEntity.ok(customerService.updateCustomer(id, customer));
+        return customerService.updateCustomer(id, customer);
     }
 
     // Eliminar
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable String id) {
-        customerService.deleteCustomer(id);
-        return ResponseEntity.noContent().build();
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public Mono<Void> delete(@PathVariable String id) {
+        return customerService.deleteCustomer(id);
     }
 }

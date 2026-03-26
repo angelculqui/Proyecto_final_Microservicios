@@ -15,9 +15,7 @@ spring:
   # =============================================
   data:
     mongodb:
-      host: localhost
-      port: 27017
-      database: bank_db
+      uri: mongodb://mongo:27017/bank_db
       reactive:
         auto-index-creation: true  # Crea índices automáticamente según @Indexed en los documentos
 
@@ -36,3 +34,14 @@ logging:
     root: INFO
     org.springframework.web: DEBUG
     com.bank.credit: DEBUG   # Nivel de log para tu paquete
+
+kafka:
+  bootstrap-servers: kafka:9092
+
+schema:
+  registry:
+    url: http://schema-registry:8081
+
+spring:
+  redis:
+    host: redis

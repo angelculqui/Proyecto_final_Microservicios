@@ -1,14 +1,13 @@
 package com.bank.customer_service.infrastructure.repository;
 
 import com.bank.customer_service.domain.model.Customer;
-import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import org.springframework.stereotype.Repository;
-
-import java.util.Optional;
+import reactor.core.publisher.Mono;
 
 @Repository
-public interface CustomerMongoRepository extends MongoRepository<Customer, String> {
+public interface CustomerMongoRepository extends ReactiveMongoRepository<Customer, String> {
 
-    // 🔥 Query automática por Spring Data
-    Optional<Customer> findByDocumentNumber(String documentNumber);
+    // Reactive query by document number
+    Mono<Customer> findByDocumentNumber(String documentNumber);
 }

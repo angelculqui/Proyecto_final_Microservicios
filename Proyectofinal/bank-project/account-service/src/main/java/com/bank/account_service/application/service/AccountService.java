@@ -1,7 +1,7 @@
 package com.bank.account_service.application.service;
 
 import com.bank.account_service.domain.model.Account;
-import com.bank.account_service.domain.repository.AccountRepository;
+import com.bank.account_service.infrastructure.repository.AccountMongoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -11,9 +11,9 @@ import reactor.core.publisher.Mono;
 @Service
 public class AccountService {
 
-    private final AccountRepository accountRepository;
+    private final AccountMongoRepository accountRepository;
 
-    public Account createAccount(Account account) {
+    public Mono<Account> createAccount(Account account) {
         return accountRepository.save(account);
     }
 
@@ -25,11 +25,17 @@ public class AccountService {
         return accountRepository.findAll();
     }
 
-    public Account updateAccount(Account account) {
-        return accountRepository.update(account);
+    public Mono<Account> updateAccount(Account account) {
+        return accountRepository.findById(account.getId())
+                .flatMap(existing -> {
+                    existing.setAccountNumber(account.getAccountNumber());
+                    existing.setBalance(account.getBalance());
+                    existing.setAccountType(account.getAccountType());
+                    return accountRepository.save(existing);
+                });
     }
 
-    public void deleteAccount(String id) {
-        accountRepository.deleteById(id);
+    public Mono<Void> deleteAccount(String id) {
+        return accountRepository.deleteById(id);
     }
 }

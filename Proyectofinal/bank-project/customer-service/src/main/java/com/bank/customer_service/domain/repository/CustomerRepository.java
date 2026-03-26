@@ -1,19 +1,18 @@
 package com.bank.customer_service.domain.repository;
 
 import com.bank.customer_service.domain.model.Customer;
-
-import java.util.List;
-import java.util.Optional;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 public interface CustomerRepository {
 
-    List<Customer> findAll();
+    Flux<Customer> findAll();
 
-    Optional<Customer> findById(String id);
+    Mono<Customer> findById(String id);
 
-    Optional<Customer> findByDocumentNumber(String documentNumber); // 🔥 nuevo
+    Mono<Customer> findByDocumentNumber(String documentNumber);
 
-    Customer save(Customer customer);
+    Mono<Customer> save(Customer customer);
 
-    void delete(String id);
+    Mono<Void> delete(String id);
 }
