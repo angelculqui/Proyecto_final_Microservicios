@@ -9,6 +9,8 @@ spring:
       uri: mongodb://mongo:27017/bank_db
   redis:
     host: redis
+  main:
+    allow-bean-definition-overriding: true
 
 logging:
   level:
@@ -20,10 +22,3 @@ kafka:
 schema:
   registry:
     url: http://schema-registry:8081
-
-spring:
-  main:
-    allow-bean-definition-overriding: true
-
-
-

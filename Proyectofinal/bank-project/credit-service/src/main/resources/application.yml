@@ -9,25 +9,19 @@ server:
 spring:
   application:
     name: credit-service      # Nombre de la aplicación para registro y Eureka si se usa
-
-  # =============================================
-  # Configuración de MongoDB reactivo
-  # =============================================
   data:
     mongodb:
       uri: mongodb://mongo:27017/bank_db
       reactive:
-        auto-index-creation: true  # Crea índices automáticamente según @Indexed en los documentos
-
-  # =============================================
-  # Configuraciones de desarrollo y testing
-  # =============================================
+        auto-index-creation: true
   main:
-    allow-bean-definition-overriding: true  # Permite redefinir beans en tests o configs adicionales
-
+    allow-bean-definition-overriding: true
   devtools:
     restart:
-      enabled: true        # Reinicio automático en desarrollo
+      enabled: true
+  redis:
+    host: ${REDIS_HOST:redis}  # Host de Redis (variable de entorno REDIS_HOST, por defecto 'redis')
+    port: ${REDIS_PORT:6379}   # Puerto de Redis (variable de entorno REDIS_PORT, por defecto 6379)
 
 logging:
   level:
@@ -42,6 +36,3 @@ schema:
   registry:
     url: http://schema-registry:8081
 
-spring:
-  redis:
-    host: redis
