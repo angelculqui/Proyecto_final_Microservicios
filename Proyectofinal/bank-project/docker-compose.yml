@@ -1,0 +1,22 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: mongo-bank
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  customer-service:
+    build:
+      context: ./customer-service
+    container_name: customer-service
+    ports:
+      - "8081:8081"   # 🔥 corregido
+    depends_on:
+      - mongo
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://mongo:27017/bank_db
+
+volumes:
+  mongo-data:

@@ -1,0 +1,38 @@
+# =============================================
+# Configuración del servidor
+# =============================================
+server:
+  port: 8083                  # Puerto del servicio
+  servlet:
+    context-path: /credit     # Context path base (opcional)
+
+spring:
+  application:
+    name: credit-service      # Nombre de la aplicación para registro y Eureka si se usa
+
+  # =============================================
+  # Configuración de MongoDB reactivo
+  # =============================================
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: bank_db
+      reactive:
+        auto-index-creation: true  # Crea índices automáticamente según @Indexed en los documentos
+
+  # =============================================
+  # Configuraciones de desarrollo y testing
+  # =============================================
+  main:
+    allow-bean-definition-overriding: true  # Permite redefinir beans en tests o configs adicionales
+
+  devtools:
+    restart:
+      enabled: true        # Reinicio automático en desarrollo
+
+logging:
+  level:
+    root: INFO
+    org.springframework.web: DEBUG
+    com.bank.credit: DEBUG   # Nivel de log para tu paquete

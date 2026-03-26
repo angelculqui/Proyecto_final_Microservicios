@@ -1,0 +1,46 @@
+# =============================================
+# Configuración del servidor
+# =============================================
+server:
+  port: 8084                 # Puerto del servicio
+  servlet:
+    context-path: /transaction # Context path base opcional
+
+spring:
+  application:
+    name: transaction-service # Nombre de la aplicación para registro o Eureka
+
+# =============================================
+# Configuración de MongoDB reactivo
+# =============================================
+data:
+  mongodb:
+    host: localhost
+    port: 27017
+    database: bank_db
+    reactive:
+      auto-index-creation: true  # Crea índices automáticamente según @Indexed en documentos
+
+# =============================================
+# Logging
+# =============================================
+logging:
+  level:
+    root: INFO
+    org.springframework.web: DEBUG
+    com.bank.transaction_service: DEBUG   # Nivel de log para tu paquete
+
+# =============================================
+# Configuraciones de desarrollo
+# =============================================
+spring:
+  main:
+    allow-bean-definition-overriding: true  # Permite redefinir beans en tests o configs adicionales
+
+# =============================================
+# Configuraciones opcionales para pruebas y dev
+# =============================================
+spring:
+  devtools:
+    restart:
+      enabled: true        # Reinicio automático en desarrollo
