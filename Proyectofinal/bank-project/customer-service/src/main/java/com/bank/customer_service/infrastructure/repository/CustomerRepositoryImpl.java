@@ -4,7 +4,6 @@ import com.bank.customer_service.domain.model.Customer;
 import com.bank.customer_service.domain.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -35,7 +34,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
     }
 
     @Override
-    public Mono<Void> delete(String id) {
-        return mongoRepository.deleteById(id);
+    public Mono<Void> delete(Customer customer) {
+        return mongoRepository.delete(customer);
     }
 }

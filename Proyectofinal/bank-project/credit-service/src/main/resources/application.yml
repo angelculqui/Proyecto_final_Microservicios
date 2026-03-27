@@ -11,9 +11,10 @@ spring:
     name: credit-service      # Nombre de la aplicación para registro y Eureka si se usa
   data:
     mongodb:
-      uri: mongodb://mongo:27017/bank_db
-      reactive:
-        auto-index-creation: true
+      uri: mongodb://mongo:27017/credit_db
+      auto-index-creation: true
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka-1:9092}
   main:
     allow-bean-definition-overriding: true
   devtools:
@@ -29,10 +30,17 @@ logging:
     org.springframework.web: DEBUG
     com.bank.credit: DEBUG   # Nivel de log para tu paquete
 
-kafka:
-  bootstrap-servers: kafka:9092
 
 schema:
   registry:
     url: http://schema-registry:8081
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,info,env"
+  endpoint:
+    health:
+      show-details: always
 

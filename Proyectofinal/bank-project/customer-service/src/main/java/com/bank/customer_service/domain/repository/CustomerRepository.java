@@ -14,5 +14,5 @@ public interface CustomerRepository {
 
     Mono<Customer> save(Customer customer);
 
-    Mono<Void> delete(String id);
+    Mono<Void> delete(Customer customer);
 }

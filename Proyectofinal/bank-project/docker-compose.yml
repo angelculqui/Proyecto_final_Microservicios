@@ -1,48 +1,96 @@
 services:
-  zookeeper:
-    image: confluentinc/cp-zookeeper:7.6.1
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-    ports:
-      - "2181:2181"
 
+  # ============================
+  # KAFKA MODERNO (KRaft)
+  # ============================
   kafka:
     image: confluentinc/cp-kafka:7.6.1
-    depends_on: [ zookeeper ]
+    container_name: kafka-1
     ports:
       - "9092:9092"
       - "29092:29092"
     environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,EXTERNAL://kafka:29092
-      KAFKA_LISTENERS: INTERNAL://0.0.0.0:9092,EXTERNAL://0.0.0.0:29092
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      # Identificador del nodo
+      KAFKA_NODE_ID: 1
 
+      # Identificador único del cluster KRaft (en Base64, 16 bytes -> 24 chars).
+      # Confluent espera un CLUSTER_ID codificado en base64; un ejemplo válido de 16 bytes
+      # (a partir de la cadena 'abcdefghijklmnop') es 'YWJjZGVmZ2hpamtsbW5vcA=='.
+      # Si prefieres generar uno aleatorio en PowerShell, ejecuta:
+      # $b = New-Object byte[] 16; (New-Object System.Security.Cryptography.RNGCryptoServiceProvider).GetBytes($b); [Convert]::ToBase64String($b)
+      CLUSTER_ID: "YWJjZGVmZ2hpamtsbW5vcA=="
+
+      # Roles del nodo (broker + controller)
+      KAFKA_PROCESS_ROLES: broker,controller
+
+      # Quorum de controladores (solo 1 nodo) — usar el nombre de servicio 'kafka' para resolución interna
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:29093"
+
+      # Listeners internos y externos (agregamos EXTERNAL para el puerto 29092)
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:29093,EXTERNAL://0.0.0.0:29092
+      # Anunciar listeners: PLAINTEXT para la comunicación entre contenedores (kafka)
+      # y EXTERNAL para acceso desde el host (localhost:29092)
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,EXTERNAL://localhost:29092
+
+      # Mapa de protocolos
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+
+      # Listener del controlador
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+
+      # Directorio de logs KRaft
+      KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
+
+      # Replicación mínima
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+
+    restart: always
+
+  # ============================
+  # SCHEMA REGISTRY (KRaft)
+  # ============================
   schema-registry:
     image: confluentinc/cp-schema-registry:7.6.1
-    depends_on: [ kafka ]
+    container_name: schema-registry-1
+    depends_on:
+      - kafka
     ports:
       - "8081:8081"
     environment:
       SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:9092
       SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
-      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry-1
 
+  # ============================
+  # REDIS
+  # ============================
   redis:
     image: redis:6-alpine
     ports:
       - "6379:6379"
 
+  # ============================
+  # MONGO
+  # ============================
   mongo:
     image: mongo:7
     container_name: mongo-bank
+    # Set internal hostname to 'mongo-bank' so other containers can resolve
+    # the hostname 'mongo-bank' (we keep container_name as requested).
+    # Without this, Docker Compose DNS resolves the service name 'mongo' by default,
+    # but not necessarily the container_name. Adding hostname ensures the
+    # hostname 'mongo-bank' is resolvable inside the compose network.
+    hostname: mongo-bank
     ports:
       - "27017:27017"
     volumes:
       - mongo-data:/data/db
 
+  # ============================
+  # CUSTOMER SERVICE
+  # ============================
   customer-service:
     build:
       context: ./customer-service
@@ -55,12 +103,20 @@ services:
       - kafka
       - schema-registry
     environment:
-      SPRING_DATA_MONGODB_URI: mongodb://mongo:27017/bank_db
+      # We intentionally use the hostname 'mongo-bank' to match the container_name.
+      # Adding 'hostname: mongo-bank' in the mongo service above ensures this
+      # hostname resolves inside the Docker Compose network.
+      SPRING_DATA_MONGODB_URI: mongodb://mongo-bank:27017/customer_db
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       SCHEMA_REGISTRY_URL: http://schema-registry:8081
       REDIS_HOST: redis
+      REDIS_PORT: 6379
       SPRING_PROFILES_ACTIVE: docker
 
+  # ============================
+  # ACCOUNT SERVICE
+  # ============================
   account-service:
     build:
       context: ./account-service
@@ -73,12 +129,18 @@ services:
       - kafka
       - schema-registry
     environment:
-      SPRING_DATA_MONGODB_URI: mongodb://mongo:27017/bank_db
+      # Use the same mongo container hostname
+      SPRING_DATA_MONGODB_URI: mongodb://mongo-bank:27017/account_db
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       SCHEMA_REGISTRY_URL: http://schema-registry:8081
       REDIS_HOST: redis
+      REDIS_PORT: 6379
       SPRING_PROFILES_ACTIVE: docker
 
+  # ============================
+  # CREDIT SERVICE
+  # ============================
   credit-service:
     build:
       context: ./credit-service
@@ -91,12 +153,18 @@ services:
       - kafka
       - schema-registry
     environment:
-      SPRING_DATA_MONGODB_URI: mongodb://mongo:27017/bank_db
+      # Use the same mongo container hostname
+      SPRING_DATA_MONGODB_URI: mongodb://mongo-bank:27017/credit_db
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       SCHEMA_REGISTRY_URL: http://schema-registry:8081
       REDIS_HOST: redis
+      REDIS_PORT: 6379
       SPRING_PROFILES_ACTIVE: docker
 
+  # ============================
+  # TRANSACTION SERVICE
+  # ============================
   transaction-service:
     build:
       context: ./transaction-service
@@ -109,10 +177,13 @@ services:
       - kafka
       - schema-registry
     environment:
-      SPRING_DATA_MONGODB_URI: mongodb://mongo:27017/bank_db
+      # Use the same mongo container hostname
+      SPRING_DATA_MONGODB_URI: mongodb://mongo-bank:27017/transaction_db
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       SCHEMA_REGISTRY_URL: http://schema-registry:8081
       REDIS_HOST: redis
+      REDIS_PORT: 6379
       SPRING_PROFILES_ACTIVE: docker
 
 volumes:

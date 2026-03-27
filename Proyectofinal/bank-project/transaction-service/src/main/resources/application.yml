@@ -3,23 +3,27 @@
 # =============================================
 server:
   port: 8084                 # Puerto del servicio
-  servlet:
-    context-path: /transaction # Context path base opcional
+  # servlet:                 # ❌ ELIMINADO: WebFlux NO usa servlet
+  #   context-path: /transaction
 
 spring:
   application:
-    name: transaction-service # Nombre de la aplicación para registro o Eureka
-
-# =============================================
-# Configuración de MongoDB reactivo
-# =============================================
-data:
-  mongodb:
-    host: localhost
-    port: 27017
-    database: bank_db
-    reactive:
-      auto-index-creation: true  # Crea índices automáticamente según @Indexed en documentos
+    name: transaction-service
+  config:
+    import: "optional:configserver:"
+  webflux:
+    base-path: /transaction   # ✔ CORRECTO para WebFlux
+  data:
+    mongodb:
+      uri: ${SPRING_DATA_MONGODB_URI:mongodb://mongo:27017/transaction_db}
+      auto-index-creation: true
+  main:
+    allow-bean-definition-overriding: true
+  devtools:
+    restart:
+      enabled: true
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka-1:9092}
 
 # =============================================
 # Logging
@@ -28,19 +32,15 @@ logging:
   level:
     root: INFO
     org.springframework.web: DEBUG
-    com.bank.transaction_service: DEBUG   # Nivel de log para tu paquete
+    com.bank.transaction_service: DEBUG
 
-# =============================================
-# Configuraciones de desarrollo
-# =============================================
-spring:
-  main:
-    allow-bean-definition-overriding: true  # Permite redefinir beans en tests o configs adicionales
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,info,env"
+  endpoint:
+    health:
+      show-details: always
 
-# =============================================
-# Configuraciones opcionales para pruebas y dev
-# =============================================
-spring:
-  devtools:
-    restart:
-      enabled: true        # Reinicio automático en desarrollo
+
