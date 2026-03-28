@@ -11,6 +11,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -36,7 +38,6 @@ public abstract class Account {
     @NotBlank(message = "Account number is required")
     private String accountNumber;
 
-    // Este campo ya NO se serializa dos veces
     @JsonIgnore
     private String accountType;
 
@@ -49,6 +50,11 @@ public abstract class Account {
     @Min(value = 0, message = "Transactions this month must be >= 0")
     private Integer transactionsThisMonth;
 
-    // Getter virtual para que Jackson siga usando el tipo correcto
+    // 🔥 NUEVO: Multi‑titulares y firmantes
+    private List<String> holders;   // Titulares
+    private List<String> signers;   // Firmantes autorizados
+
     public abstract String getAccountType();
 }
+
+

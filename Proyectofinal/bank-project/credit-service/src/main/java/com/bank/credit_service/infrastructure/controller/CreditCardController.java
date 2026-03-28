@@ -2,6 +2,7 @@ package com.bank.credit_service.infrastructure.controller;
 
 import com.bank.credit_service.application.service.CreditCardService;
 import com.bank.credit_service.domain.dto.CreateCreditCardRequest;
+import com.bank.credit_service.domain.dto.ConsumeCreditCardRequest;
 import com.bank.credit_service.domain.model.CreditCard;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -48,4 +49,17 @@ public class CreditCardController {
     public Flux<CreditCard> getCreditCardsByClient(@PathVariable String clientId) {
         return creditCardService.getCreditCardsByClient(clientId);
     }
+
+    // 🔥 NUEVO: Consumo de tarjeta
+    @PostMapping("/consume")
+    public Mono<CreditCard> consume(@RequestBody ConsumeCreditCardRequest request) {
+        return creditCardService.consume(request);
+    }
+
+    // 🔥 NUEVO: Consulta de límite disponible
+    @GetMapping("/{id}/available-limit")
+    public Mono<Double> getAvailableLimit(@PathVariable String id) {
+        return creditCardService.getAvailableLimit(id);
+    }
 }
+

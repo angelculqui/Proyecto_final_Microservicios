@@ -37,4 +37,16 @@ public class AccountRepositoryImpl implements AccountRepository {
     public Mono<Void> deleteById(String id) {
         return mongoRepo.deleteById(id);
     }
+
+    // 🔥 NUEVO
+    public Flux<Account> findByHolders(String clientId) {
+        return mongoRepo.findByHoldersContaining(clientId);
+    }
+
+    // 🔥 NUEVO
+    public Flux<Account> findBySigners(String clientId) {
+        return mongoRepo.findBySignersContaining(clientId);
+    }
 }
+
+

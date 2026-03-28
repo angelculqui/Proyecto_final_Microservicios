@@ -8,6 +8,12 @@ import reactor.core.publisher.Flux;
 @Repository
 public interface AccountMongoRepository extends ReactiveMongoRepository<Account, String> {
 
-    // 🔥 NECESARIO PARA FASE 6
     Flux<Account> findByCustomerId(String customerId);
+
+    // 🔥 NUEVO
+    Flux<Account> findByHoldersContaining(String clientId);
+
+    // 🔥 NUEVO
+    Flux<Account> findBySignersContaining(String clientId);
 }
+

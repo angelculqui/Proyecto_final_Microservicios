@@ -21,7 +21,10 @@ public class AccountService {
     // CREATE
     public Mono<Account> createAccount(Account account) {
         return getCustomerFromService(account.getCustomerId())
-                .flatMap(customer -> validateBusinessRules(account, customer.getType()))
+                .flatMap(customer ->
+                        validateBusinessRules(account, customer.getType())
+                                .then(validateHoldersAndSigners(account, customer.getType()))
+                )
                 .then(validateDuplicateAccountNumber(account))
                 .then(accountRepository.save(account));
     }
@@ -36,9 +39,25 @@ public class AccountService {
         return accountRepository.findAll();
     }
 
-    // 🔥 GET ACCOUNTS BY CLIENT ID
+    // GET ACCOUNTS BY CLIENT ID
     public Flux<Account> getAccountsByClient(String clientId) {
         return accountRepository.findByCustomerId(clientId);
+    }
+
+    // 🔥 NUEVO: obtener saldo
+    public Mono<Double> getBalance(String accountId) {
+        return accountRepository.findById(accountId)
+                .switchIfEmpty(Mono.error(new RuntimeException("Account not found")))
+                .map(Account::getBalance);
+    }
+
+    // 🔥 NUEVO: obtener cuentas donde el cliente es titular o firmante
+    public Flux<Account> getAccountsRelatedToClient(String clientId) {
+        return Flux.merge(
+                accountRepository.findByCustomerId(clientId),
+                accountRepository.findByHoldersContaining(clientId),
+                accountRepository.findBySignersContaining(clientId)
+        ).distinct();
     }
 
     // UPDATE
@@ -52,6 +71,8 @@ public class AccountService {
                     existing.setAccountType(account.getAccountType());
                     existing.setMaxTransactionsWithoutFee(account.getMaxTransactionsWithoutFee());
                     existing.setTransactionsThisMonth(account.getTransactionsThisMonth());
+                    existing.setHolders(account.getHolders());
+                    existing.setSigners(account.getSigners());
 
                     return accountRepository.save(existing);
                 });
@@ -143,6 +164,30 @@ public class AccountService {
         return Mono.empty();
     }
 
+    // 🔥 NUEVO: validación de holders y signers
+    private Mono<Void> validateHoldersAndSigners(Account account, String customerType) {
+
+        if (customerType.equals("PERSONAL")) {
+            account.setHolders(List.of(account.getCustomerId()));
+            account.setSigners(List.of());
+            return Mono.empty();
+        }
+
+        if (customerType.equals("BUSINESS")) {
+
+            if (account.getHolders() == null || account.getHolders().isEmpty()) {
+                return Mono.error(new RuntimeException("Business accounts must have at least one holder"));
+            }
+
+            return Flux.fromIterable(account.getHolders())
+                    .concatWith(Flux.fromIterable(account.getSigners() == null ? List.of() : account.getSigners()))
+                    .flatMap(this::getCustomerFromService)
+                    .then();
+        }
+
+        return Mono.error(new RuntimeException("Invalid customer type"));
+    }
+
     @Data
     public static class CustomerResponse {
         private String id;
@@ -151,5 +196,6 @@ public class AccountService {
         private String type;
     }
 }
+
 
 

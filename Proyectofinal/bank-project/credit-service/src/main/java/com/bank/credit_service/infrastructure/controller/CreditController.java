@@ -2,6 +2,7 @@ package com.bank.credit_service.infrastructure.controller;
 
 import com.bank.credit_service.application.service.CreditService;
 import com.bank.credit_service.domain.dto.CreateCreditRequest;
+import com.bank.credit_service.domain.dto.PayCreditRequest;
 import com.bank.credit_service.domain.model.Credit;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -48,4 +49,17 @@ public class CreditController {
     public Flux<Credit> getCreditsByClient(@PathVariable String clientId) {
         return creditService.getCreditsByClient(clientId);
     }
+
+    // 🔥 NUEVO: Pago de crédito
+    @PostMapping("/pay")
+    public Mono<Credit> payCredit(@RequestBody PayCreditRequest request) {
+        return creditService.payCredit(request);
+    }
+
+    // 🔥 NUEVO: Consulta de saldo pendiente
+    @GetMapping("/{id}/remaining-balance")
+    public Mono<Double> getRemainingBalance(@PathVariable String id) {
+        return creditService.getRemainingBalance(id);
+    }
 }
+
