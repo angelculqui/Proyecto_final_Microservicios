@@ -4,6 +4,8 @@ import com.bank.account_service.domain.model.Account;
 import com.bank.account_service.infrastructure.repository.AccountMongoRepository;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cloud.client.circuitbreaker.ReactiveCircuitBreaker;
+import org.springframework.cloud.client.circuitbreaker.ReactiveCircuitBreakerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
@@ -17,6 +19,7 @@ public class AccountService {
 
     private final AccountMongoRepository accountRepository;
     private final WebClient webClient;
+    private final ReactiveCircuitBreakerFactory<?, ?> circuitBreakerFactory;
 
     // CREATE
     public Mono<Account> createAccount(Account account) {
@@ -44,14 +47,14 @@ public class AccountService {
         return accountRepository.findByCustomerId(clientId);
     }
 
-    // 🔥 NUEVO: obtener saldo
+    // NUEVO: obtener saldo
     public Mono<Double> getBalance(String accountId) {
         return accountRepository.findById(accountId)
                 .switchIfEmpty(Mono.error(new RuntimeException("Account not found")))
                 .map(Account::getBalance);
     }
 
-    // 🔥 NUEVO: obtener cuentas donde el cliente es titular o firmante
+    // NUEVO: obtener cuentas donde el cliente es titular o firmante
     public Flux<Account> getAccountsRelatedToClient(String clientId) {
         return Flux.merge(
                 accountRepository.findByCustomerId(clientId),
@@ -88,11 +91,19 @@ public class AccountService {
     // ============================
 
     private Mono<CustomerResponse> getCustomerFromService(String customerId) {
-        return webClient.get()
-                .uri("http://customer-service:8081/api/customers/" + customerId)
+        ReactiveCircuitBreaker cb =
+                circuitBreakerFactory.create("customerServiceCircuitBreaker");
+
+        Mono<CustomerResponse> call = webClient.get()
+                .uri("http://customer-service:8081/api/customers/{id}", customerId)
                 .retrieve()
                 .bodyToMono(CustomerResponse.class)
                 .switchIfEmpty(Mono.error(new RuntimeException("Customer does not exist")));
+
+        return cb.run(
+                call,
+                throwable -> Mono.error(new RuntimeException("Customer service unavailable", throwable))
+        );
     }
 
     private Mono<Void> validateDuplicateAccountNumber(Account account) {
@@ -164,7 +175,7 @@ public class AccountService {
         return Mono.empty();
     }
 
-    // 🔥 NUEVO: validación de holders y signers
+    // validación de holders y signers
     private Mono<Void> validateHoldersAndSigners(Account account, String customerType) {
 
         if (customerType.equals("PERSONAL")) {
@@ -196,6 +207,7 @@ public class AccountService {
         private String type;
     }
 }
+
 
 
 

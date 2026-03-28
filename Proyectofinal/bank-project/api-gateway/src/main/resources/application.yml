@@ -1,0 +1,74 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+
+      routes:
+
+        - id: customer-service
+          uri: lb://customer-service
+          predicates:
+            - Path=/api/customers/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 5
+                redis-rate-limiter.burstCapacity: 10
+
+        - id: account-service
+          uri: lb://account-service
+          predicates:
+            - Path=/api/accounts/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 5
+                redis-rate-limiter.burstCapacity: 10
+
+        - id: credit-service
+          uri: lb://credit-service
+          predicates:
+            - Path=/api/credits/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 5
+                redis-rate-limiter.burstCapacity: 10
+
+        - id: transaction-service
+          uri: lb://transaction-service
+          predicates:
+            - Path=/api/transactions/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 5
+                redis-rate-limiter.burstCapacity: 10
+
+    httpclient:
+      connect-timeout: 3000
+      response-timeout: 5s
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+
+# ? Configuración global del Rate Limiter
+redis:
+  host: redis
+  port: 6379
+

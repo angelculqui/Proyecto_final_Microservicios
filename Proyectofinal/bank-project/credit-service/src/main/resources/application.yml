@@ -1,6 +1,3 @@
-# =============================================
-# Configuración del servidor
-# =============================================
 server:
   port: 8083
 
@@ -12,7 +9,7 @@ spring:
       uri: ${SPRING_DATA_MONGODB_URI:mongodb://mongo-bank:27017/credit_db}
       auto-index-creation: true
   kafka:
-    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka-1:9092}
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
   main:
     allow-bean-definition-overriding: true
   devtools:
@@ -21,6 +18,15 @@ spring:
   redis:
     host: ${REDIS_HOST:redis}
     port: ${REDIS_PORT:6379}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
 
 logging:
   level:
@@ -41,3 +47,12 @@ management:
     health:
       show-details: always
 
+# ---------------------------------------------------------
+# 🔥 AGREGADO: Zipkin + Sleuth (trazabilidad distribuida)
+# ---------------------------------------------------------
+spring:
+  sleuth:
+    sampler:
+      probability: 1.0   # 🔥 Siempre enviar trazas (100%)
+  zipkin:
+    base-url: http://zipkin:9411   # 🔥 Zipkin dentro de Docker Compose

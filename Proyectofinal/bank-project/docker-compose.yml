@@ -89,6 +89,21 @@ services:
       - mongo-data:/data/db
 
   # ============================
+  # EUREKA
+  # ============================
+  eureka-server:
+    build:
+      context: ./eureka-server
+    container_name: eureka-server
+    ports:
+      - "8761:8761"
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+    networks:
+      - default
+
+
+  # ============================
   # CUSTOMER SERVICE
   # ============================
   customer-service:
@@ -185,6 +200,35 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
       SPRING_PROFILES_ACTIVE: docker
+
+    # ============================
+    # API-GATEWAY
+    # ============================
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - eureka-server
+      - customer-service
+      - account-service
+      - credit-service
+      - transaction-service
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+
+    # ============================
+    # zipkin (trazabilidad distribuida)
+    # ============================
+  zipkin:
+    image: openzipkin/zipkin
+    container_name: zipkin
+    ports:
+      - "9411:9411"
+
 
 volumes:
   mongo-data:

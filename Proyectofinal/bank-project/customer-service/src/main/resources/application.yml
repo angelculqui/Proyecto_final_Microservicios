@@ -8,18 +8,28 @@ spring:
     mongodb:
       uri: ${SPRING_DATA_MONGODB_URI:mongodb://mongo-bank:27017/customer_db}
   kafka:
-    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka-1:9092}
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
 
 logging:
   level:
     root: INFO
     com.bank.customer_service: DEBUG
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "health,info,env"
-  endpoint:
-    health:
-      show-details: always
+# ---------------------------------------------------------
+# 🔥 AGREGADO: Zipkin + Sleuth (trazabilidad distribuida)
+# ---------------------------------------------------------
+spring:
+  sleuth:
+    sampler:
+      probability: 1.0   # 🔥 Siempre enviar trazas (100%)
+  zipkin:
+    base-url: http://zipkin:9411   # 🔥 Zipkin dentro de Docker Compose

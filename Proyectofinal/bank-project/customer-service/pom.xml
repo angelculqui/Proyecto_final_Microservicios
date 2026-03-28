@@ -68,7 +68,7 @@
             <artifactId>reactor-adapter</artifactId>
         </dependency>
 
-        <!-- Reactor Core explicit (ensure Mono/Flux available) -->
+        <!-- Reactor Core explicit -->
         <dependency>
             <groupId>io.projectreactor</groupId>
             <artifactId>reactor-core</artifactId>
@@ -106,6 +106,26 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
+
+        <!-- 🔥 AGREGADO: Eureka Client -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+        </dependency>
+
+        <!-- Sleuth + Zipkin -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-sleuth-zipkin</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-sleuth-zipkin-stream</artifactId>
+        </dependency>
+
+
+
     </dependencies>
 
     <dependencyManagement>
@@ -148,7 +168,7 @@
                 </configuration>
             </plugin>
 
-            <!-- JaCoCo for Test Coverage -->
+            <!-- JaCoCo -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -168,6 +188,8 @@
                     </execution>
                 </executions>
             </plugin>
+
         </plugins>
     </build>
+
 </project>
