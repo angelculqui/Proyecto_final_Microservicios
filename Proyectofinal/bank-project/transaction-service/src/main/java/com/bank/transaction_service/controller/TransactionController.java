@@ -19,20 +19,17 @@ public class TransactionController {
         this.service = service;
     }
 
-    // Endpoint para crear transacción
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Mono<Transaction> createTransaction(@Valid @RequestBody Transaction transaction) {
         return service.createTransaction(transaction);
     }
 
-    // Endpoint para listar todas las transacciones
     @GetMapping
     public Flux<Transaction> getAllTransactions() {
         return service.getAllTransactions();
     }
 
-    // Endpoint para listar transacciones por cuenta
     @GetMapping("/account/{accountId}")
     public Flux<Transaction> getTransactionsByAccount(@PathVariable String accountId) {
         return service.getTransactionsByAccount(accountId);

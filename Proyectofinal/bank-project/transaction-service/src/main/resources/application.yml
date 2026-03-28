@@ -2,20 +2,16 @@
 # Configuración del servidor
 # =============================================
 server:
-  port: 8084                 # Puerto del servicio
-  # servlet:                 # ❌ ELIMINADO: WebFlux NO usa servlet
-  #   context-path: /transaction
+  port: 8084
 
 spring:
   application:
     name: transaction-service
   config:
     import: "optional:configserver:"
-  webflux:
-    base-path: /transaction   # ✔ CORRECTO para WebFlux
   data:
     mongodb:
-      uri: ${SPRING_DATA_MONGODB_URI:mongodb://mongo:27017/transaction_db}
+      uri: ${SPRING_DATA_MONGODB_URI:mongodb://mongo-bank:27017/transaction_db}
       auto-index-creation: true
   main:
     allow-bean-definition-overriding: true
@@ -42,5 +38,3 @@ management:
   endpoint:
     health:
       show-details: always
-
-

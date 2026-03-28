@@ -1,5 +1,7 @@
 package com.bank.credit_service.application.service;
 
+import com.bank.credit_service.client.CustomerClient;
+import com.bank.credit_service.domain.dto.CreateCreditCardRequest;
 import com.bank.credit_service.domain.model.CreditCard;
 import com.bank.credit_service.domain.repository.CreditCardRepository;
 import lombok.RequiredArgsConstructor;
@@ -7,72 +9,71 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-/**
- * Servicio de negocio para tarjetas de crédito.
- * Permite crear, actualizar, consultar y eliminar tarjetas de crédito.
- */
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
 @Service
 @RequiredArgsConstructor
 public class CreditCardService {
 
     private final CreditCardRepository creditCardRepository;
+    private final CustomerClient customerClient;
 
-    /**
-     * Crear una nueva tarjeta de crédito
-     *
-     * @param creditCard Objeto tarjeta de crédito a guardar
-     * @return Mono con la tarjeta guardada
-     */
-    public Mono<CreditCard> createCreditCard(CreditCard creditCard) {
-        return creditCardRepository.save(creditCard);
+    public Mono<CreditCard> createCreditCard(CreateCreditCardRequest request) {
+
+        if (!request.getCardType().equals("PERSONAL") &&
+                !request.getCardType().equals("BUSINESS")) {
+            return Mono.error(new RuntimeException("Invalid card type"));
+        }
+
+        if (request.getCreditLimit() <= 0) {
+            return Mono.error(new RuntimeException("Credit limit must be positive"));
+        }
+
+        CreditCard card = new CreditCard();
+        card.setClientId(request.getClientId());
+        card.setCardType(request.getCardType());
+        card.setCardNumber(request.getCardNumber());
+        card.setCreditLimit(BigDecimal.valueOf(request.getCreditLimit()));
+        card.setCurrentBalance(BigDecimal.ZERO);
+        card.setExpirationDate(LocalDate.parse(request.getExpirationDate()));
+        card.setActive(true);
+
+        return customerClient.getCustomerById(request.getClientId())
+                .flatMap(customer -> creditCardRepository.save(card));
     }
 
-    /**
-     * Obtener todas las tarjetas
-     *
-     * @return Flux con todas las tarjetas
-     */
     public Flux<CreditCard> getAllCreditCards() {
         return creditCardRepository.findAll();
     }
 
-    /**
-     * Obtener tarjeta por ID
-     *
-     * @param id ID de la tarjeta
-     * @return Mono con la tarjeta si existe
-     */
     public Mono<CreditCard> getCreditCardById(String id) {
         return creditCardRepository.findById(id);
     }
 
-    /**
-     * Actualizar tarjeta de crédito
-     *
-     * @param creditCard Objeto con datos actualizados
-     * @return Mono con la tarjeta actualizada
-     */
-    public Mono<CreditCard> updateCreditCard(CreditCard creditCard) {
-        return creditCardRepository.update(creditCard);
+    public Mono<CreditCard> updateCreditCard(CreditCard card) {
+        return creditCardRepository.findById(card.getId())
+                .switchIfEmpty(Mono.error(new RuntimeException("Card not found")))
+                .flatMap(existing -> {
+
+                    if (!existing.isActive()) {
+                        return Mono.error(new RuntimeException("Card is inactive"));
+                    }
+
+                    existing.setCreditLimit(card.getCreditLimit());
+                    existing.setExpirationDate(card.getExpirationDate());
+
+                    return creditCardRepository.update(existing);
+                });
     }
 
-    /**
-     * Eliminar tarjeta de crédito
-     *
-     * @param id ID de la tarjeta
-     * @return Mono vacío al completar
-     */
     public Mono<Void> deleteCreditCard(String id) {
         return creditCardRepository.deleteById(id);
     }
 
-    /**
-     * Obtener tarjetas de un cliente
-     *
-     * @param clientId ID del cliente
-     * @return Flux con las tarjetas del cliente
-     */
     public Flux<CreditCard> getCreditCardsByClient(String clientId) {
         return creditCardRepository.findByClientId(clientId);
     }
 }
+
+

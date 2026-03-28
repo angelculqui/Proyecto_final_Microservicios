@@ -1,6 +1,7 @@
 package com.bank.transaction_service.service;
 
-import com.bank.transaction_service.client.AccountClient; // 🔥 cliente para llamar a account-service
+import com.bank.transaction_service.client.AccountClient;
+import com.bank.transaction_service.dto.AccountDTO;
 import com.bank.transaction_service.model.Transaction;
 import com.bank.transaction_service.repository.TransactionRepository;
 
@@ -14,45 +15,53 @@ import java.time.LocalDateTime;
 public class TransactionService {
 
     private final TransactionRepository repository;
-    private final AccountClient accountClient; // 🔥 inyectamos el cliente
+    private final AccountClient accountClient;
 
-    // 🔥 Constructor con ambas dependencias
     public TransactionService(TransactionRepository repository,
                               AccountClient accountClient) {
         this.repository = repository;
         this.accountClient = accountClient;
     }
 
-    // ============================================
-    // ✅ CREAR TRANSACCIÓN CON VALIDACIÓN REAL
-    // ============================================
     public Mono<Transaction> createTransaction(Transaction transaction) {
 
-        // 🔥 llamamos al account-service para validar que la cuenta existe
-        String accountResponse = accountClient.getAccountById(transaction.getAccountId());
-
-        // ⚠️ validación simple (luego lo mejoramos con DTO)
-        if (accountResponse == null || accountResponse.isEmpty()) {
-            return Mono.error(new RuntimeException("Account not found"));
-        }
-
-        // 🔥 asignamos fecha actual
-        transaction.setTimestamp(LocalDateTime.now());
-
-        // 🔥 guardamos en Mongo
-        return repository.save(transaction);
+        return accountClient.getAccountById(transaction.getAccountId())
+                .flatMap(account -> validateAndApplyTransaction(account, transaction))
+                .flatMap(updatedAccount -> accountClient.updateAccount(updatedAccount)
+                        .then(repository.save(transaction)));
     }
 
-    // ============================================
-    // 📄 OBTENER TODAS LAS TRANSACCIONES
-    // ============================================
+    private Mono<AccountDTO> validateAndApplyTransaction(AccountDTO account, Transaction tx) {
+
+        if (tx.getAmount() <= 0) {
+            return Mono.error(new RuntimeException("Amount must be positive"));
+        }
+
+        switch (tx.getType()) {
+
+            case "DEPOSIT":
+                account.setBalance(account.getBalance() + tx.getAmount());
+                break;
+
+            case "WITHDRAW":
+                if (account.getBalance() < tx.getAmount()) {
+                    return Mono.error(new RuntimeException("Insufficient balance"));
+                }
+                account.setBalance(account.getBalance() - tx.getAmount());
+                break;
+
+            default:
+                return Mono.error(new RuntimeException("Invalid transaction type"));
+        }
+
+        tx.setTimestamp(LocalDateTime.now());
+        return Mono.just(account);
+    }
+
     public Flux<Transaction> getAllTransactions() {
         return repository.findAll();
     }
 
-    // ============================================
-    // 📄 OBTENER TRANSACCIONES POR CUENTA
-    // ============================================
     public Flux<Transaction> getTransactionsByAccount(String accountId) {
         return repository.findByAccountId(accountId);
     }

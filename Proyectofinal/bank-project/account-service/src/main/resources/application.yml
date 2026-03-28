@@ -6,7 +6,7 @@ spring:                               # unificado: ahora solo hay un bloque 'spr
     name: account-service
   data:
     mongodb:
-      uri: mongodb://mongo:27017/account_db
+      uri: mongodb://mongo-bank:27017/account_db
   redis:
     host: ${REDIS_HOST:redis}
     port: ${REDIS_PORT:6379}

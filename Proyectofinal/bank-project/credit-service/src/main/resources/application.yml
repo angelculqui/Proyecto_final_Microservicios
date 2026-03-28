@@ -2,16 +2,14 @@
 # Configuración del servidor
 # =============================================
 server:
-  port: 8083                  # Puerto del servicio
-  servlet:
-    context-path: /credit     # Context path base (opcional)
+  port: 8083
 
 spring:
   application:
-    name: credit-service      # Nombre de la aplicación para registro y Eureka si se usa
+    name: credit-service
   data:
     mongodb:
-      uri: mongodb://mongo:27017/credit_db
+      uri: ${SPRING_DATA_MONGODB_URI:mongodb://mongo-bank:27017/credit_db}
       auto-index-creation: true
   kafka:
     bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka-1:9092}
@@ -21,15 +19,14 @@ spring:
     restart:
       enabled: true
   redis:
-    host: ${REDIS_HOST:redis}  # Host de Redis (variable de entorno REDIS_HOST, por defecto 'redis')
-    port: ${REDIS_PORT:6379}   # Puerto de Redis (variable de entorno REDIS_PORT, por defecto 6379)
+    host: ${REDIS_HOST:redis}
+    port: ${REDIS_PORT:6379}
 
 logging:
   level:
     root: INFO
     org.springframework.web: DEBUG
-    com.bank.credit: DEBUG   # Nivel de log para tu paquete
-
+    com.bank.credit: DEBUG
 
 schema:
   registry:

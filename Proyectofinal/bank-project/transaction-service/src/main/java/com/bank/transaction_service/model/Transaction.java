@@ -13,16 +13,16 @@ import java.time.LocalDateTime;
 public class Transaction {
 
     @Id
-    private String id;                  // ID único generado por MongoDB
+    private String id;
 
     @NotNull
-    private String accountId;           // ID de la cuenta asociada a la transacción
+    private String accountId;
 
     @Positive
-    private double amount;              // Monto de la transacción
+    private double amount;
 
     @NotNull
-    private String type;                // Tipo de transacción: DEBIT / CREDIT
+    private String type; // DEPOSIT / WITHDRAW
 
-    private LocalDateTime timestamp;    // Fecha y hora de la transacción
+    private LocalDateTime timestamp;
 }
