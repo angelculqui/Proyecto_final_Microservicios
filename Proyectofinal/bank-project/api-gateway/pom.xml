@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>4.0.5</version>
+		<version>3.2.4</version>
 		<relativePath/>
 	</parent>
 
@@ -18,7 +18,7 @@
 
 	<properties>
 		<java.version>17</java.version>
-		<spring-cloud.version>2025.1.1</spring-cloud.version>
+		<spring-cloud.version>2023.0.1</spring-cloud.version>
 	</properties>
 
 	<dependencies>
@@ -35,16 +35,33 @@
 			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
 		</dependency>
 
-		<!-- 🔥 Redis Reactive (necesario para Rate Limiting) -->
+		<!-- Redis Reactive (Rate Limiting) -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-redis-reactive</artifactId>
 		</dependency>
 
-		<!-- 🔥 Circuit Breaker opcional en Gateway -->
+		<!-- Circuit Breaker opcional -->
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-circuitbreaker-reactor-resilience4j</artifactId>
+		</dependency>
+
+		<!-- Micrometer Tracing + Brave + Zipkin -->
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-tracing-bridge-brave</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>io.zipkin.reporter2</groupId>
+			<artifactId>zipkin-reporter-brave</artifactId>
+		</dependency>
+
+		<!-- 🔥 CAMBIO: agregado Actuator para habilitar /actuator/health -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
 
 		<!-- Test -->
@@ -78,5 +95,9 @@
 	</build>
 
 </project>
+
+
+
+
 
 

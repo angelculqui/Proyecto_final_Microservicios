@@ -85,35 +85,34 @@
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
-        <!-- 🔥 AGREGADO: Eureka Client -->
+        <!-- Eureka Client -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
         </dependency>
 
-        <!-- 🔥 Circuit Breaker (Resilience4j Reactor) -->
+        <!-- Circuit Breaker (Resilience4j Reactor) -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-circuitbreaker-reactor-resilience4j</artifactId>
         </dependency>
 
-        <!-- 🔥 Métricas Resilience4j (opcional pero recomendado) -->
+        <!-- Métricas Resilience4j -->
         <dependency>
             <groupId>io.github.resilience4j</groupId>
             <artifactId>resilience4j-micrometer</artifactId>
         </dependency>
 
-        <!-- Sleuth + Zipkin -->
+        <!-- 🔥 Micrometer Tracing + Brave + Zipkin (reemplazo de Sleuth) -->
         <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-sleuth-zipkin</artifactId>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-tracing-bridge-brave</artifactId>
         </dependency>
 
         <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-sleuth-zipkin-stream</artifactId>
+            <groupId>io.zipkin.reporter2</groupId>
+            <artifactId>zipkin-reporter-brave</artifactId>
         </dependency>
-
 
     </dependencies>
 
@@ -153,3 +152,4 @@
     </build>
 
 </project>
+

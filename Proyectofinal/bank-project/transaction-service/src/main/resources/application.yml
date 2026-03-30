@@ -4,17 +4,22 @@ server:
 spring:
   application:
     name: transaction-service
+
   config:
     import: "optional:configserver:"
+
   data:
     mongodb:
       uri: ${SPRING_DATA_MONGODB_URI:mongodb://mongo-bank:27017/transaction_db}
       auto-index-creation: true
+
   main:
     allow-bean-definition-overriding: true
+
   devtools:
     restart:
       enabled: true
+
   kafka:
     bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
 
@@ -42,6 +47,17 @@ management:
     health:
       show-details: always
 
+  tracing:
+    sampling:
+      probability: 1.0
+
+  zipkin:
+    tracing:
+      endpoint: http://zipkin:9411/api/v2/spans
+
+# ---------------------------------------------------------
+# 🔥 RESILIENCE4J
+# ---------------------------------------------------------
 resilience4j:
   circuitbreaker:
     instances:
@@ -59,31 +75,17 @@ resilience4j:
       accountServiceCircuitBreaker:
         timeout-duration: 3s
 
-# ---------------------------------------------------------
-# 🔥 AGREGADO: Zipkin + Sleuth (trazabilidad distribuida)
-# ---------------------------------------------------------
-spring:
-  sleuth:
-    sampler:
-      probability: 1.0   # 🔥 Siempre enviar trazas (100%)
-  zipkin:
-    base-url: http://zipkin:9411   # 🔥 Zipkin dentro de Docker Compose
+  retry:
+    instances:
+      accountServiceRetry:
+        max-attempts: 3
+        wait-duration: 500ms
+        retry-exceptions:
+          - java.io.IOException
+          - org.springframework.web.reactive.function.client.WebClientRequestException
 
-  # ---------------------------------------------------------
-  # 🔥 AGREGADO: Retry + Bulkhead (Resilience4j)
-  # ---------------------------------------------------------
-  resilience4j:
-    retry:
-      instances:
-        accountServiceRetry:
-          max-attempts: 3
-          wait-duration: 500ms
-          retry-exceptions:
-            - java.io.IOException
-            - org.springframework.web.reactive.function.client.WebClientRequestException
-
-    bulkhead:
-      instances:
-        accountServiceBulkhead:
-          max-concurrent-calls: 10
-          max-wait-duration: 2s
+  bulkhead:
+    instances:
+      accountServiceBulkhead:
+        max-concurrent-calls: 10
+        max-wait-duration: 2s

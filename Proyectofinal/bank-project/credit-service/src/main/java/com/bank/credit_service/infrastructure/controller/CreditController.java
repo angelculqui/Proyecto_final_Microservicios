@@ -11,7 +11,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
-@RequestMapping("/api/credits")
+@RequestMapping("/credits")
 @RequiredArgsConstructor
 public class CreditController {
 

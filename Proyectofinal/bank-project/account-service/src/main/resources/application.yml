@@ -4,17 +4,67 @@ server:
 spring:
   application:
     name: account-service
+
   data:
     mongodb:
       uri: mongodb://mongo-bank:27017/account_db
+
   redis:
     host: ${REDIS_HOST:redis}
     port: ${REDIS_PORT:6379}
+
   kafka:
     bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
+
   main:
     allow-bean-definition-overriding: true
 
+  # 🔥 ZIPKIN + BRAVE (Micrometer Tracing)
+  sleuth:
+    sampler:
+      probability: 1.0
+
+  zipkin:
+    base-url: http://zipkin:9411
+
+# ---------------------------------------------------------
+# 🔥 RESILIENCE4J
+# ---------------------------------------------------------
+resilience4j:
+  circuitbreaker:
+    instances:
+      customerServiceCircuitBreaker:
+        register-health-indicator: true
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 5s
+        permitted-number-of-calls-in-half-open-state: 3
+        automatic-transition-from-open-to-half-open-enabled: true
+
+  timelimiter:
+    instances:
+      customerServiceCircuitBreaker:
+        timeout-duration: 3s
+
+  retry:
+    instances:
+      customerServiceRetry:
+        max-attempts: 3
+        wait-duration: 500ms
+        retry-exceptions:
+          - java.io.IOException
+          - org.springframework.web.reactive.function.client.WebClientRequestException
+
+  bulkhead:
+    instances:
+      customerServiceBulkhead:
+        max-concurrent-calls: 10
+        max-wait-duration: 2s
+
+# ---------------------------------------------------------
+# 🔥 EUREKA
+# ---------------------------------------------------------
 eureka:
   client:
     service-url:
@@ -41,50 +91,3 @@ management:
   endpoint:
     health:
       show-details: always
-
-resilience4j:
-  circuitbreaker:
-    instances:
-      customerServiceCircuitBreaker:
-        register-health-indicator: true
-        sliding-window-size: 10
-        minimum-number-of-calls: 5
-        failure-rate-threshold: 50
-        wait-duration-in-open-state: 5s
-        permitted-number-of-calls-in-half-open-state: 3
-        automatic-transition-from-open-to-half-open-enabled: true
-
-  timelimiter:
-    instances:
-      customerServiceCircuitBreaker:
-        timeout-duration: 3s
-
-# ---------------------------------------------------------
-# 🔥 AGREGADO: Zipkin + Sleuth (trazabilidad distribuida)
-# ---------------------------------------------------------
-spring:
-  sleuth:
-    sampler:
-      probability: 1.0   # 🔥 Siempre enviar trazas (100%)
-  zipkin:
-    base-url: http://zipkin:9411   # 🔥 Zipkin dentro de Docker Compose
-
-
-  # ---------------------------------------------------------
-  # 🔥 AGREGADO: Retry + Bulkhead (Resilience4j)
-  # ---------------------------------------------------------
-  resilience4j:
-    retry:
-      instances:
-        customerServiceRetry:
-          max-attempts: 3          # 🔥 Reintenta 3 veces
-          wait-duration: 500ms     # 🔥 Espera 500ms entre intentos
-          retry-exceptions:
-            - java.io.IOException
-            - org.springframework.web.reactive.function.client.WebClientRequestException
-
-    bulkhead:
-      instances:
-        customerServiceBulkhead:
-          max-concurrent-calls: 10   # 🔥 Máximo 10 llamadas simultáneas
-          max-wait-duration: 2s      # 🔥 Espera máximo 2 segundos por un espacio
