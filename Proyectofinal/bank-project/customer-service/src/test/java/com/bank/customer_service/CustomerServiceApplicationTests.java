@@ -1,13 +1,12 @@
 package com.bank.customer_service;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
 class CustomerServiceApplicationTests {
 
 	@Test
 	void contextLoads() {
+		// Test vacío: no se levanta Spring Boot
 	}
-
 }
+

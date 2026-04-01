@@ -11,7 +11,7 @@ public class CustomerClient {
 
     private final WebClient webClient;
 
-    private static final String BASE_URL = "http://customer-service:8081/api/customers";
+    private static final String BASE_URL = "http://customer-service:8081/customers";
 
     public Mono<CustomerDTO> getCustomerById(String id) {
         return webClient.get()

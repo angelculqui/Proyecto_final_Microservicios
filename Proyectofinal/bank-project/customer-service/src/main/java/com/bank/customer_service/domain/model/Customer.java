@@ -8,6 +8,10 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+/**
+ * Customer entity.
+ * // 🔧 CAMBIO: agregado Javadoc requerido
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -25,5 +29,5 @@ public class Customer {
     private String documentNumber;
 
     @NotBlank(message = "Customer type is required")
-    private String type; // PERSONAL o BUSINESS
+    private String type;
 }

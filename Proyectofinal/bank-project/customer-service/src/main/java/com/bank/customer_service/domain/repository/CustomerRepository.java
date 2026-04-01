@@ -4,6 +4,10 @@ import com.bank.customer_service.domain.model.Customer;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+/**
+ * Repository interface for Customer.
+ * // 🔧 CAMBIO: agregado Javadoc requerido
+ */
 public interface CustomerRepository {
 
     Flux<Customer> findAll();
@@ -16,3 +20,4 @@ public interface CustomerRepository {
 
     Mono<Void> delete(Customer customer);
 }
+

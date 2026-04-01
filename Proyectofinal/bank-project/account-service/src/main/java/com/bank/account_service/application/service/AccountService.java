@@ -95,7 +95,7 @@ public class AccountService {
                 circuitBreakerFactory.create("customerServiceCircuitBreaker");
 
         Mono<CustomerResponse> call = webClient.get()
-                .uri("http://customer-service:8081/api/customers/{id}", customerId)
+                .uri("http://customer-service:8081/customers/{id}", customerId)
                 .retrieve()
                 .bodyToMono(CustomerResponse.class)
                 .switchIfEmpty(Mono.error(new RuntimeException("Customer does not exist")));

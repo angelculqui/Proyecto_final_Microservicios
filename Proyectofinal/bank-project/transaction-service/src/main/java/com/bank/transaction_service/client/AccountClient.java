@@ -15,7 +15,7 @@ public class AccountClient {
     private final WebClient webClient;
     private final ReactiveCircuitBreakerFactory<?, ?> circuitBreakerFactory;
 
-    private static final String BASE_URL = "http://account-service:8082/api/accounts";
+    private static final String BASE_URL = "http://account-service:8082/accounts";
 
     public Mono<AccountDTO> getAccountById(String accountId) {
 
