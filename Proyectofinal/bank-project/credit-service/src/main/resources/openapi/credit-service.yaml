@@ -1,0 +1,512 @@
+openapi: 3.0.3
+info:
+  title: Credit Service API
+  version: 1.0.0
+  description: API para la gestión de créditos y tarjetas de crédito.
+
+servers:
+  - url: http://localhost:8083
+    description: Local environment
+
+tags:
+  - name: Credits
+    description: Operaciones relacionadas con créditos bancarios
+  - name: Credit Cards
+    description: Operaciones relacionadas con tarjetas de crédito
+
+paths:
+
+  ###############################################
+  #                 CREDITS
+  ###############################################
+
+  /credits:
+    post:
+      tags: [Credits]
+      summary: Crear un crédito
+      operationId: createCredit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCreditRequest'
+      responses:
+        '201':
+          description: Crédito creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Credit'
+        '400':
+          description: Error de validación o negocio
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    get:
+      tags: [Credits]
+      summary: Obtener todos los créditos
+      operationId: getAllCredits
+      responses:
+        '200':
+          description: Lista de créditos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Credit'
+
+  /credits/{id}:
+    get:
+      tags: [Credits]
+      summary: Obtener crédito por ID
+      operationId: getCreditById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Crédito encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Credit'
+        '404':
+          description: Crédito no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      tags: [Credits]
+      summary: Actualizar un crédito
+      operationId: updateCredit
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Credit'
+      responses:
+        '200':
+          description: Crédito actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Credit'
+        '400':
+          description: Error de negocio
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Crédito no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      tags: [Credits]
+      summary: Eliminar un crédito
+      operationId: deleteCredit
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '204':
+          description: Eliminado exitosamente
+        '404':
+          description: Crédito no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /credits/client/{clientId}:
+    get:
+      tags: [Credits]
+      summary: Obtener créditos por cliente
+      operationId: getCreditsByClient
+      parameters:
+        - name: clientId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Créditos del cliente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Credit'
+
+  /credits/pay:
+    post:
+      tags: [Credits]
+      summary: Registrar un pago de crédito
+      operationId: payCredit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PayCreditRequest'
+      responses:
+        '200':
+          description: Crédito actualizado tras el pago
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Credit'
+        '400':
+          description: Error de negocio (pago inválido)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Crédito no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /credits/{id}/remaining-balance:
+    get:
+      tags: [Credits]
+      summary: Consultar saldo pendiente
+      operationId: getRemainingBalance
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Saldo pendiente del crédito
+          content:
+            application/json:
+              schema:
+                type: number
+                format: double
+        '404':
+          description: Crédito no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  ###############################################
+  #             CREDIT CARDS
+  ###############################################
+
+  /credit-cards:
+    post:
+      tags: [Credit Cards]
+      summary: Crear tarjeta de crédito
+      operationId: createCreditCard
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCreditCardRequest'
+      responses:
+        '201':
+          description: Tarjeta creada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditCard'
+
+    get:
+      tags: [Credit Cards]
+      summary: Obtener todas las tarjetas
+      operationId: getAllCreditCards
+      responses:
+        '200':
+          description: Lista de tarjetas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CreditCard'
+
+  /credit-cards/{id}:
+    get:
+      tags: [Credit Cards]
+      summary: Obtener tarjeta por ID
+      operationId: getCreditCardById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Tarjeta encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditCard'
+        '404':
+          description: Tarjeta no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      tags: [Credit Cards]
+      summary: Actualizar tarjeta
+      operationId: updateCreditCard
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreditCard'
+      responses:
+        '200':
+          description: Tarjeta actualizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditCard'
+        '400':
+          description: Error de negocio
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Tarjeta no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      tags: [Credit Cards]
+      summary: Eliminar tarjeta
+      operationId: deleteCreditCard
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '204':
+          description: Eliminada exitosamente
+        '404':
+          description: Tarjeta no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /credit-cards/client/{clientId}:
+    get:
+      tags: [Credit Cards]
+      summary: Obtener tarjetas por cliente
+      operationId: getCreditCardsByClient
+      parameters:
+        - name: clientId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Tarjetas del cliente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CreditCard'
+
+  /credit-cards/consume:
+    post:
+      tags: [Credit Cards]
+      summary: Registrar consumo de tarjeta
+      operationId: consumeCreditCard
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConsumeCreditCardRequest'
+      responses:
+        '200':
+          description: Tarjeta actualizada tras el consumo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreditCard'
+        '400':
+          description: Error de negocio (límite insuficiente, monto inválido)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /credit-cards/{id}/available-limit:
+    get:
+      tags: [Credit Cards]
+      summary: Consultar límite disponible
+      operationId: getAvailableLimit
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Límite disponible
+          content:
+            application/json:
+              schema:
+                type: number
+                format: double
+        '404':
+          description: Tarjeta no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+###############################################
+#                COMPONENTS
+###############################################
+
+components:
+
+  schemas:
+
+    Credit:
+      type: object
+      properties:
+        id: { type: string }
+        clientId: { type: string }
+        creditType:
+          type: string
+          enum: [PERSONAL, BUSINESS]
+        amount:
+          type: number
+          format: double
+        balance:
+          type: number
+          format: double
+        interestRate:
+          type: number
+          format: double
+        startDate:
+          type: string
+          format: date
+        dueDate:
+          type: string
+          format: date
+        paidOff:
+          type: boolean
+
+    CreditCard:
+      type: object
+      properties:
+        id: { type: string }
+        clientId: { type: string }
+        cardType:
+          type: string
+          enum: [PERSONAL, BUSINESS]
+        cardNumber: { type: string }
+        creditLimit:
+          type: number
+          format: double
+        currentBalance:
+          type: number
+          format: double
+        expirationDate:
+          type: string
+          format: date
+        active:
+          type: boolean
+
+    CreateCreditRequest:
+      type: object
+      required: [clientId, creditType, amount, interestRate]
+      properties:
+        clientId: { type: string }
+        creditType:
+          type: string
+          enum: [PERSONAL, BUSINESS]
+        amount:
+          type: number
+          format: double
+        interestRate:
+          type: number
+          format: double
+
+    PayCreditRequest:
+      type: object
+      required: [creditId, amount]
+      properties:
+        creditId: { type: string }
+        amount:
+          type: number
+          format: double
+
+    CreateCreditCardRequest:
+      type: object
+      required: [clientId, cardType, cardNumber, creditLimit, expirationDate]
+      properties:
+        clientId: { type: string }
+        cardType:
+          type: string
+          enum: [PERSONAL, BUSINESS]
+        cardNumber: { type: string }
+        creditLimit:
+          type: number
+          format: double
+        expirationDate:
+          type: string
+          format: date
+
+    ConsumeCreditCardRequest:
+      type: object
+      required: [cardId, amount]
+      properties:
+        cardId: { type: string }
+        amount:
+          type: number
+          format: double
+
+    ErrorResponse:
+      type: object
+      properties:
+        status: { type: integer }
+        error: { type: string }
+      example:
+        status: 400
+        error: "Mensaje de error"

@@ -39,7 +39,6 @@
     </dependencyManagement>
 
     <dependencies>
-
         <!-- Spring Boot Starter Web Reactive -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -124,18 +123,19 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- 🔥 AGREGADO: Eureka Client -->
+        <!-- Eureka Client -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
         </dependency>
-        <!-- 🔥 Circuit Breaker (Resilience4j) -->
+
+        <!-- Circuit Breaker (Resilience4j) -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-circuitbreaker-reactor-resilience4j</artifactId>
         </dependency>
 
-        <!-- 🔥 Opcional pero recomendado: métricas -->
+        <!-- Métricas Resilience4j -->
         <dependency>
             <groupId>io.github.resilience4j</groupId>
             <artifactId>resilience4j-micrometer</artifactId>
@@ -151,13 +151,10 @@
             <groupId>io.zipkin.reporter2</groupId>
             <artifactId>zipkin-reporter-brave</artifactId>
         </dependency>
-
-
     </dependencies>
 
     <build>
         <plugins>
-
             <!-- Compiler Plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -182,7 +179,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
 
-            <!-- JaCoCo -->
+            <!-- Jacoco (Cobertura para SonarQube) -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -195,7 +192,7 @@
                     </execution>
                     <execution>
                         <id>report</id>
-                        <phase>prepare-package</phase>
+                        <phase>test</phase>
                         <goals>
                             <goal>report</goal>
                         </goals>
@@ -203,7 +200,13 @@
                 </executions>
             </plugin>
 
+            <!-- SonarQube -->
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>3.9.1.2184</version>
+            </plugin>
         </plugins>
     </build>
-
 </project>
+

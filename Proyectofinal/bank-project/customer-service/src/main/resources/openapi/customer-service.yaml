@@ -1,0 +1,206 @@
+openapi: 3.0.3
+info:
+  title: Customer Service API
+  description: API para la gestión de clientes del sistema bancario.
+  version: 1.0.0
+  contact:
+    name: Customer Service Team
+    email: support@bank.com
+
+servers:
+  - url: http://localhost:8081
+    description: Local environment
+
+tags:
+  - name: Customers
+    description: Operaciones CRUD para clientes
+
+paths:
+
+  /customers:
+    get:
+      tags:
+        - Customers
+      summary: Obtener todos los clientes
+      operationId: getAllCustomers
+      responses:
+        '200':
+          description: Lista de clientes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Customer'
+
+    post:
+      tags:
+        - Customers
+      summary: Crear un nuevo cliente
+      operationId: createCustomer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Customer'
+            example:
+              name: "Juan Perez"
+              documentNumber: "12345678"
+              type: "PERSONAL"
+      responses:
+        '201':
+          description: Cliente creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+        '400':
+          description: Error de validación
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+
+  /customers/{id}:
+    get:
+      tags:
+        - Customers
+      summary: Obtener un cliente por ID
+      operationId: getCustomerById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Cliente encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+        '404':
+          description: Cliente no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      tags:
+        - Customers
+      summary: Actualizar un cliente existente
+      operationId: updateCustomer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Customer'
+            example:
+              name: "Juan Perez"
+              documentNumber: "12345678"
+              type: "PERSONAL"
+      responses:
+        '200':
+          description: Cliente actualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Customer'
+        '400':
+          description: Error de validación
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '404':
+          description: Cliente no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      tags:
+        - Customers
+      summary: Eliminar un cliente
+      operationId: deleteCustomer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Cliente eliminado exitosamente
+        '404':
+          description: Cliente no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+
+  schemas:
+
+    Customer:
+      type: object
+      required:
+        - name
+        - documentNumber
+        - type
+      properties:
+        id:
+          type: string
+          description: ID del cliente
+        name:
+          type: string
+          description: Nombre del cliente
+        documentNumber:
+          type: string
+          description: Número de documento del cliente
+        type:
+          type: string
+          description: Tipo de cliente (PERSONAL / BUSINESS)
+      example:
+        id: "65f1c2a9e4b0a12f34cd5678"
+        name: "Juan Perez"
+        documentNumber: "12345678"
+        type: "PERSONAL"
+
+    ValidationError:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 400
+        errors:
+          type: object
+          additionalProperties:
+            type: string
+      example:
+        status: 400
+        errors:
+          name: "Name is required"
+          documentNumber: "Document number is required"
+
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          example: 404
+        error:
+          type: string
+          example: "Customer not found"

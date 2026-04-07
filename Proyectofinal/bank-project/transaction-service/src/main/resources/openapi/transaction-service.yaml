@@ -1,0 +1,144 @@
+openapi: 3.0.3
+info:
+  title: Transaction Service API
+  description: API para registrar transacciones bancarias (depósitos y retiros) y consultar historial.
+  version: 1.0.0
+  contact:
+    name: Transaction Service Team
+    email: support@bank.com
+
+servers:
+  - url: http://localhost:8084
+    description: Local environment
+
+tags:
+  - name: Transactions
+    description: Operaciones relacionadas con transacciones bancarias
+
+paths:
+
+  /transactions:
+    get:
+      tags: [Transactions]
+      summary: Obtener todas las transacciones
+      operationId: getAllTransactions
+      responses:
+        '200':
+          description: Lista de transacciones
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Transaction'
+
+    post:
+      tags: [Transactions]
+      summary: Crear una nueva transacción
+      operationId: createTransaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Transaction'
+            example:
+              accountId: "65f1c2a9e4b0a12f34cd5678"
+              amount: 150.0
+              type: "DEPOSIT"
+      responses:
+        '201':
+          description: Transacción creada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Transaction'
+        '400':
+          description: Error de validación o reglas de negocio
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /transactions/account/{accountId}:
+    get:
+      tags: [Transactions]
+      summary: Obtener transacciones por ID de cuenta
+      operationId: getTransactionsByAccount
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200':
+          description: Lista de transacciones de la cuenta
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Transaction'
+        '404':
+          description: Cuenta no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+
+  schemas:
+
+    Transaction:
+      type: object
+      required:
+        - accountId
+        - amount
+        - type
+      properties:
+        id:
+          type: string
+        accountId:
+          type: string
+          description: ID de la cuenta asociada
+        amount:
+          type: number
+          format: double
+          description: Monto de la transacción
+        type:
+          type: string
+          description: Tipo de transacción
+          enum: [DEPOSIT, WITHDRAW]
+        timestamp:
+          type: string
+          format: date-time
+          description: Fecha y hora de la transacción
+      example:
+        id: "tx123"
+        accountId: "acc789"
+        amount: 100.0
+        type: "DEPOSIT"
+        timestamp: "2024-03-15T10:30:00"
+
+    AccountDTO:
+      type: object
+      properties:
+        id: { type: string }
+        customerId: { type: string }
+        accountNumber: { type: string }
+        accountType: { type: string }
+        balance: { type: number }
+        maxTransactionsWithoutFee: { type: integer }
+        transactionsThisMonth: { type: integer }
+
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+        error:
+          type: string
+      example:
+        status: 400
+        error: "Insufficient balance"

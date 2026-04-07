@@ -24,7 +24,6 @@
     </properties>
 
     <dependencies>
-
         <!-- Spring WebFlux -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -105,23 +104,19 @@
             <artifactId>zipkin-reporter-brave</artifactId>
         </dependency>
 
-        <!-- 🔥 TESTING -->
-
-        <!-- Base de tests de Spring Boot -->
+        <!-- TESTING -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-test</artifactId>
             <scope>test</scope>
         </dependency>
 
-        <!-- Necesario para @WebFluxTest, @MockBean, @DataMongoTest -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-test-autoconfigure</artifactId>
             <scope>test</scope>
         </dependency>
 
-        <!-- JUnit + Mockito integration -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -134,20 +129,17 @@
             </exclusions>
         </dependency>
 
-        <!-- Mockito puro -->
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
         </dependency>
 
-        <!-- Reactor Test (StepVerifier) -->
         <dependency>
             <groupId>io.projectreactor</groupId>
             <artifactId>reactor-test</artifactId>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
     <dependencyManagement>
@@ -164,7 +156,6 @@
 
     <build>
         <plugins>
-
             <!-- Compiler -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -193,7 +184,7 @@
                 </configuration>
             </plugin>
 
-            <!-- JaCoCo -->
+            <!-- Jacoco (Cobertura para SonarQube) -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -206,7 +197,7 @@
                     </execution>
                     <execution>
                         <id>report</id>
-                        <phase>prepare-package</phase>
+                        <phase>test</phase>
                         <goals>
                             <goal>report</goal>
                         </goals>
@@ -214,10 +205,16 @@
                 </executions>
             </plugin>
 
+            <!-- SonarQube -->
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>3.9.1.2184</version>
+            </plugin>
         </plugins>
     </build>
-
 </project>
+
 
 
 

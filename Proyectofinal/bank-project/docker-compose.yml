@@ -216,6 +216,26 @@ services:
     ports:
       - "9411:9411"
 
+
+  # ============================
+  # SONARQUBE (ANÁLISIS DE CÓDIGO)
+  # ============================
+  sonarqube:
+    image: sonarqube:latest
+    container_name: sonarqube
+    ports:
+      - "9001:9000"
+    environment:
+      SONAR_ES_BOOTSTRAP_CHECKS_DISABLE: "true"
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+    restart: always
+
+
 volumes:
   mongo-data:
+  sonarqube_data:
+  sonarqube_extensions:
+
 

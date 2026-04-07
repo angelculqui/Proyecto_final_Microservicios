@@ -23,7 +23,7 @@
 
 	<dependencies>
 
-		<!-- Gateway WebFlux -->
+		<!-- Gateway WebFlux (solo una vez) -->
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-gateway</artifactId>
@@ -58,7 +58,7 @@
 			<artifactId>zipkin-reporter-brave</artifactId>
 		</dependency>
 
-		<!-- 🔥 CAMBIO: agregado Actuator para habilitar /actuator/health -->
+		<!-- Actuator para health checks -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
@@ -87,10 +87,20 @@
 
 	<build>
 		<plugins>
+
+			<!-- Plugin de Spring Boot -->
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+
+			<!-- Plugin de SonarQube -->
+			<plugin>
+				<groupId>org.sonarsource.scanner.maven</groupId>
+				<artifactId>sonar-maven-plugin</artifactId>
+				<version>3.9.1.2184</version>
+			</plugin>
+
 		</plugins>
 	</build>
 
